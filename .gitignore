@@ -1,0 +1,11 @@
+*.lock.json
+*.user
+artifacts/
+.vs/
+.git/
+bin/
+obj/
+tmp/
+src/pack.bat
+node_modules/
+out/
