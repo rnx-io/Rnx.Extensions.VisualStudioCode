@@ -2,7 +2,7 @@
 	"name": "rnx",
 	"displayName": "Rnx",
 	"description": "Task runner extension for Rnx",
-	"version": "0.3.0",
+	"version": "0.3.2",
     "authors": [
         "Daniel Kailer"
     ],

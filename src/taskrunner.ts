@@ -1,13 +1,15 @@
 import {exec} from 'child_process';
-import {workspace} from 'vscode';
+import * as vscode from 'vscode';
     
 export function runTask(taskName:string, args:string)
 {
-    var commandLine = 'dnx -p "' + workspace.rootPath + '" rnx ' + taskName + " " + args;
-                    
-    var cp = exec(commandLine, { cwd: workspace.rootPath });
+    var commandLine = 'dnx -p "' + vscode.workspace.rootPath + '" rnx ' + taskName + " " + args;
+    var cp = exec(commandLine, { cwd: vscode.workspace.rootPath });
     var outputTemp = "";
-        
+    var outputChannel = vscode.window.createOutputChannel("rnx");
+    
+    outputChannel.show(vscode.ViewColumn.Three);
+    
     // read standard output and make sure that it will be logged linewise on the console
     cp.stdout.on('data', (d) =>
     {
@@ -24,7 +26,7 @@ export function runTask(taskName:string, args:string)
                 
                 if(sub.length > 0)
                 {
-                    console.log(sub);
+                    outputChannel.appendLine(sub);
                 }
             }
             else
