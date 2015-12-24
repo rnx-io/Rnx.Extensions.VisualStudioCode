@@ -7,8 +7,19 @@ export function runTask(taskName:string, args:string)
     var cp = exec(commandLine, { cwd: vscode.workspace.rootPath });
     var outputTemp = "";
     var outputChannel = vscode.window.createOutputChannel("rnx");
-    
     outputChannel.show(vscode.ViewColumn.Three);
+    
+    cp.addListener("close", (exitCode, signal) => 
+    {
+        if(exitCode == 0)
+        {
+            vscode.window.showInformationMessage("Rnx task '" + taskName + "' completed successfully");
+        }
+        else
+        {
+            vscode.window.showErrorMessage("Rnx task '" + taskName + "' failed. " + signal);
+        }
+    });
     
     // read standard output and make sure that it will be logged linewise on the console
     cp.stdout.on('data', (d) =>
