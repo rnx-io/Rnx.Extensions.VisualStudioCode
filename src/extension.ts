@@ -1,79 +1,58 @@
-// The module 'vscode' contains the VS Code extensibility API
-import * as vscode from 'vscode';
-import * as taskRunner from './taskrunner';
-import * as taskNameParser from './tasknameparser';
-import * as rnxJsonLoader from './rnxjsonloader';
+'use strict';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+import {workspace, commands, ExtensionContext, window} from 'vscode';
+import {Rnx} from './core/Rnx';
+import {InfoWindowTaskRunListener} from './ui/infoWindowTaskRunListener';
+import {StatusBarTaskRunListener} from './ui/statusBarTaskRunListener';
+import {OutputChannelTaskRunListener} from './ui/outputChannelTaskRunListener';
+import {TaskInfo} from './abstractions/taskInfo';
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	var disposable = vscode.commands.registerCommand('extension.rnx', () => {
-    
-        if (vscode.workspace.rootPath === null)
-        {
+let rnx: Rnx;
+
+export function activate(context: ExtensionContext) {
+	let rnxExtension = commands.registerCommand('extension.rnx', () => {
+        if (!workspace.rootPath) {
             return;
         }
         
-        var rnxConfig;
+        if(!rnx) {
+            rnx = new Rnx();
+            rnx.addTaskRunListener(new InfoWindowTaskRunListener());
+            rnx.addTaskRunListener(new OutputChannelTaskRunListener());
+            rnx.addTaskRunListener(new StatusBarTaskRunListener(rnx));
+        }
         
-        rnxJsonLoader.loadRnxJson().then(cfg => 
-        {
-            rnxConfig = cfg; // save for later
-            return getFileNames(rnxConfig);
-        })
-        .then(taskNameParser.parseTaskNames)
-        .then(tasks =>  
-        {
-            handleAvailableTasks(rnxConfig, tasks);
-        });
+        rnx.load();
 	});
     
-	context.subscriptions.push(disposable);
-}
-
-function handleAvailableTasks(rnxConfig, tasks: any[])
-{
-    if(tasks.length == 0)
-    {
-        vscode.window.showErrorMessage("No rnx tasks found");
-    }
-    else
-    {
-        vscode.window.showQuickPick(tasks).then(value=> {
-            if(value)
-            {
-                var args = rnxConfig && rnxConfig.args ? rnxConfig.args : "";
-                taskRunner.runTask(value.label, args);
-            }
-        });
-    }
-}
-
-// get all source code files that contain tasks
-// if no rnx.json file is found, we expect a "rnx.cs" file
-function getFileNames(rnxConfig)
-{
-    var csFileGlobPatterns: string[] = [];
-       
-    if(rnxConfig && rnxConfig.sources)
-    {
-        for(var i in rnxConfig.sources)
-        {
-            csFileGlobPatterns.push(rnxConfig.sources[i]);
+    let rnxKillExtension = commands.registerCommand('extension.rnx.kill', () => {
+        if (!rnx) {
+            return;
         }
-    }
-    else
-    {
-        csFileGlobPatterns.push("rnx.cs");    
-    }
+        
+        let runningTasks = Array.from(rnx.runningTasks());
+        
+        if(runningTasks.length == 0) {
+            window.showWarningMessage("No tasks are running");
+        }
+        else {
+            let tasks = runningTasks.map(f => new TaskInfo(f, "Terminate task '" + f + "'"));
+            
+            window.showQuickPick(tasks).then(value => {
+                if(value) {
+                    rnx.terminateTask(value.label);
+                }
+            });
+        }
+	});
     
-    return csFileGlobPatterns;
+	context.subscriptions.push(rnxExtension);
+    context.subscriptions.push(rnxKillExtension);
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {
+    if(rnx) {
+        rnx.dispose();
+        rnx = null;
+    }
 }

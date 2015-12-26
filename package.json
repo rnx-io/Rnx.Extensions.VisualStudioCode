@@ -2,11 +2,13 @@
 	"name": "rnx",
 	"displayName": "Rnx",
 	"description": "Task runner extension for Rnx",
-	"version": "0.3.2",
+	"version": "0.4.0",
+    "icon": "images/logo.png",
     "authors": [
         "Daniel Kailer"
     ],
-	"publisher": "DanielKailer",
+    "projectUrl": "https://github.com/rnx-io/Rnx.Extensions.VisualStudioCode",
+	"publisher": "reliak",
     "repository": {
         "type": "git",
         "url": "https://github.com/rnx-io/Rnx.Extensions.VisualStudioCode"
@@ -19,14 +21,43 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extension.rnx"
+		"onCommand:extension.rnx",
+        "onCommand:extension.rnx.kill"
 	],
 	"main": "./out/src/extension",
 	"contributes": {
 		"commands": [{
 			"command": "extension.rnx",
 			"title": "List available Rnx tasks"
-		}]
+		}, {
+			"command": "extension.rnx.kill",
+			"title": "Terminate running Rnx tasks"
+		}],
+        "keybindings": [{
+            "command": "extension.rnx",
+            "key": "alt+r"
+        }],
+        "configuration": {
+            "type": "object",
+            "title": "Rnx configuration",
+            "properties": {
+                "rnx.displayTaskStatus": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Specifies whether a info window is shown when a task started or completed. Failed or aborted task will always be displayed."
+                },
+                "rnx.hideOutputWindowOnSuccess": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Specifies whether the output window for a task should be hidden when the task was successful."
+                },
+                "rnx.taskOutputViewColumn": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "Specifies the view column (values from 1 to 3) where the task output should be shown."
+                }
+            }
+        }
 	},
 	"scripts": {
 		"vscode:prepublish": "node ./node_modules/vscode/bin/compile",
