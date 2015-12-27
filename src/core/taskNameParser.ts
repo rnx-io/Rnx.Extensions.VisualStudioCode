@@ -3,6 +3,7 @@
 import {workspace} from 'vscode';
 import * as fs from 'fs';
 import {TaskInfo} from '../abstractions/taskInfo';
+import {removeComments} from '../util/csCommentStripper';
 
 const regex = new RegExp("public\\s+.*?ITaskDescriptor\\s+(\\w+)", "g");
 
@@ -15,6 +16,10 @@ export function parseTaskNames(csFileGlobPatterns:string[]) : Promise<TaskInfo[]
             let promise = workspace.findFiles(pattern, "").then(filenames => {
                 for(let filename of filenames) {
                     let data = fs.readFileSync(filename.fsPath, 'utf8');
+                    
+                    // remove comments to avoid showing ITaskDescriptor-properties or -methods
+                    // that are commented out
+                    data = removeComments(data);
                     let match;
                     
                     while(match = regex.exec(data)) {
