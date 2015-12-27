@@ -1,7 +1,7 @@
 'use strict';
 
 import {workspace} from 'vscode';
-import * as fs from 'fs';
+import {readFileSync} from 'fs';
 import {TaskInfo} from '../abstractions/taskInfo';
 import {removeComments} from '../util/csCommentStripper';
 
@@ -15,7 +15,7 @@ export function parseTaskNames(csFileGlobPatterns:string[]) : Promise<TaskInfo[]
         if(!pattern.startsWith("!")) {
             let promise = workspace.findFiles(pattern, "").then(filenames => {
                 for(let filename of filenames) {
-                    let data = fs.readFileSync(filename.fsPath, 'utf8');
+                    let data = readFileSync(filename.fsPath, 'utf8');
                     
                     // remove comments to avoid showing ITaskDescriptor-properties or -methods
                     // that are commented out
@@ -23,7 +23,7 @@ export function parseTaskNames(csFileGlobPatterns:string[]) : Promise<TaskInfo[]
                     let match;
                     
                     while(match = regex.exec(data)) {
-                        tasks.add(new TaskInfo(match[1], "Runs the '" + match[1] + "' task"));
+                        tasks.add(new TaskInfo(match[1], `Runs the '${match[1]}' task`));
                     }
                 }
             });

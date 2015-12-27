@@ -1,21 +1,21 @@
 'use strict';
 
-import * as vscode from 'vscode';
+import {window, OutputChannel, ViewColumn, workspace} from 'vscode';
 import {TaskRunListener} from '../abstractions/taskRunListener';
 import {TaskStartInfo} from '../abstractions/taskStartInfo';
 import {TaskOutputListener} from '../abstractions/taskOutputListener';
 
 export class OutputChannelTaskRunListener implements TaskRunListener {
     
-    private outputChannels: Map<string,vscode.OutputChannel>;
+    private outputChannels: Map<string,OutputChannel>;
     
     constructor() {
-        this.outputChannels = new Map<string,vscode.OutputChannel>();
+        this.outputChannels = new Map<string,OutputChannel>();
     }
     
     public onTaskStart(taskStartInfo: TaskStartInfo) : void {
         
-        let outputChannel = vscode.window.createOutputChannel("Rnx: " + taskStartInfo.taskName);
+        let outputChannel = window.createOutputChannel(`Rnx: ${taskStartInfo.taskName}`);
         this.outputChannels.set(taskStartInfo.taskName, outputChannel);
         
         taskStartInfo.taskOutputListeners.add(<TaskOutputListener>{
@@ -24,7 +24,7 @@ export class OutputChannelTaskRunListener implements TaskRunListener {
         });
         
         outputChannel.clear();
-        outputChannel.show(<vscode.ViewColumn>this.taskOutputViewColumn());
+        outputChannel.show(<ViewColumn>this.taskOutputViewColumn());
     }
     
     public onTaskComplete(taskName: string, exitCode: number, wasAborted: boolean) : void {
@@ -38,11 +38,11 @@ export class OutputChannelTaskRunListener implements TaskRunListener {
     }
         
     private hideOutputWindowOnSuccess() : boolean {
-        return vscode.workspace.getConfiguration("rnx").get<boolean>("hideOutputWindowOnSuccess");
+        return workspace.getConfiguration("rnx").get<boolean>("hideOutputWindowOnSuccess");
     }
     
     private taskOutputViewColumn() : number {
-        return vscode.workspace.getConfiguration("rnx").get<number>("taskOutputViewColumn");
+        return workspace.getConfiguration("rnx").get<number>("taskOutputViewColumn");
     }
     
     public dispose() {

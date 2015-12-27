@@ -36,7 +36,7 @@ export function activate(context: ExtensionContext) {
             window.showWarningMessage("No tasks are running");
         }
         else {
-            let tasks = runningTasks.map(f => new TaskInfo(f, "Terminate task '" + f + "'"));
+            let tasks = runningTasks.map(f => new TaskInfo(f, `Terminate task '${f}'`));
             
             window.showQuickPick(tasks).then(value => {
                 if(value) {

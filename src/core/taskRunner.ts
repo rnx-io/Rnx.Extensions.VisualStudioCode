@@ -1,7 +1,7 @@
 'use strict';
 
 import {ChildProcess, exec} from 'child_process';
-import * as vscode from 'vscode';
+import {workspace} from 'vscode';
 import {TaskRunListener} from '../abstractions/taskRunListener';
 import {TaskStartInfo} from '../abstractions/taskStartInfo';
 import {TaskOutputHandler} from './taskOutputHandler';
@@ -9,7 +9,7 @@ import {TaskOutputHandler} from './taskOutputHandler';
 const KILL_SIGNAL:string = "SIGKILL";
 
 export class TaskRunner {
-    listeners: Set<TaskRunListener>;
+    private listeners: Set<TaskRunListener>;
     private taskProcessMap: Map<string,ChildProcess>;
     
     constructor() {
@@ -20,7 +20,7 @@ export class TaskRunner {
     public run(taskName:string, args:string) : void {
         let taskStartInfo = new TaskStartInfo(taskName, args);
         let commandLine = this.buildCommandLine(taskName, args);
-        let cp = exec(commandLine, { cwd: vscode.workspace.rootPath });
+        let cp = exec(commandLine, { cwd: workspace.rootPath });
         this.taskProcessMap.set(taskName, cp);
         
         // notify listeners that a task has started
@@ -37,6 +37,10 @@ export class TaskRunner {
             let wasAborted:boolean = signal === KILL_SIGNAL;
             this.listeners.forEach(l => l.onTaskComplete(taskName, exitCode, wasAborted));
         });
+    }
+    
+    public addListener(listener: TaskRunListener) : void {
+        this.listeners.add(listener);
     }
     
     public runningTasks() : Iterable<string> {
@@ -61,6 +65,6 @@ export class TaskRunner {
     }
     
     private buildCommandLine(taskName:string, args:string) : string {
-        return 'dnx -p "' + vscode.workspace.rootPath + '" rnx ' + taskName + " " + args;
+        return `dnx -p "${workspace.rootPath}" rnx ${taskName} ${args}`;
     }
 }

@@ -30,7 +30,7 @@ export class Rnx implements RunningTasksProvider {
     }
     
     public addTaskRunListener(listener: TaskRunListener) : void {
-        this.taskRunner.listeners.add(listener);
+        this.taskRunner.addListener(listener);
     }
     
     public runningTasks() : Iterable<string> {

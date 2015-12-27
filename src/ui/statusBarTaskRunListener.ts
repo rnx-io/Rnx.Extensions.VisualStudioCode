@@ -1,20 +1,20 @@
 'use strict';
 
-import * as vscode from 'vscode';
+import {StatusBarItem, window} from 'vscode';
 import {TaskRunListener} from '../abstractions/taskRunListener';
 import {TaskStartInfo} from '../abstractions/taskStartInfo';
 import {RunningTasksProvider} from '../abstractions/runningTasksProvider';
 
 export class StatusBarTaskRunListener implements TaskRunListener {
     
-    private statusBarItem: vscode.StatusBarItem;
+    private statusBarItem: StatusBarItem;
     
     constructor(private runningTasksProvider: RunningTasksProvider) {
     }
     
     public onTaskStart(taskStartInfo: TaskStartInfo) : void {
         if(!this.statusBarItem) {
-            this.statusBarItem = vscode.window.createStatusBarItem();
+            this.statusBarItem = window.createStatusBarItem();
             this.statusBarItem.command = "extension.rnx.kill";
             this.statusBarItem.tooltip = "Click here to terminate running tasks";
         }
@@ -42,10 +42,10 @@ export class StatusBarTaskRunListener implements TaskRunListener {
         }
         else {
             if(runningTasks.length == 1) {
-                this.statusBarItem.text = "$(chevron-right) Task '" + runningTasks[0] + "' running...";
+                this.statusBarItem.text = `$(chevron-right) Task '${runningTasks[0]}' running...`;
             }
             else {
-                this.statusBarItem.text = "$(chevron-right) " + runningTasks.length + " tasks running...";
+                this.statusBarItem.text = `$(chevron-right) ${runningTasks.length} tasks running...`;
             }
         }
     }
