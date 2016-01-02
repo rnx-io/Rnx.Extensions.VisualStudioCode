@@ -15,19 +15,19 @@ export class Rnx implements RunningTasksProvider {
     }
     
     public load() : void {
-        parseTaskNames().then(tasks => {
-            if(tasks.length == 0) {
-                window.showWarningMessage("No rnx tasks found");
-            }
-            else {
-                window.showQuickPick(tasks).then(value => {
-                    if(value) {
-                        let cmdArgs = workspace.getConfiguration("rnx").get<string>("commandLineArgs");
-                        this.taskRunner.run(value.label, cmdArgs);
-                    }
-                });
-            }
-        });
+        var tasks = parseTaskNames()
+        
+        if(tasks.length == 0) {
+            window.showWarningMessage("No rnx tasks found");
+        }
+        else {
+            window.showQuickPick(tasks).then(value => {
+                if(value) {
+                    let cmdArgs = workspace.getConfiguration("rnx").get<string>("commandLineArgs");
+                    this.taskRunner.run(value.label, cmdArgs);
+                }
+            });
+        }
     }
     
     public addTaskRunListener(listener: TaskRunListener) : void {
