@@ -13,7 +13,7 @@ export function getRnxFile() : string {
         let found = false;
         
         for(let arg of args) {
-            if(arg === "-f" || arg === "--file") {
+            if(arg === "-f" || arg === "--filename") {
                 found = true;
             }
             else if(found) {
